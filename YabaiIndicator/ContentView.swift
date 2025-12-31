@@ -49,12 +49,27 @@ struct WindowSpaceButton : View {
         }
     }
     
+    func getDisplay() -> Display? {
+        let displayIndex = space.display - 1
+        guard displayIndex >= 0 && displayIndex < displays.count else {
+            return nil
+        }
+        return displays[displayIndex]
+    }
+    
     var body : some View {
         switch space.type {
         case .standard:
-            Image(nsImage: generateImage(active: space.active, visible: space.visible, windows: windows, display: displays[space.display-1])).onTapGesture {
-                switchSpace()
-            }.frame(width:24, height: 16)
+            if let display = getDisplay() {
+                Image(nsImage: generateImage(active: space.active, visible: space.visible, windows: windows, display: display)).onTapGesture {
+                    switchSpace()
+                }.frame(width:24, height: 16)
+            } else {
+                // Fallback to numeric display if display is not found
+                Image(nsImage: generateImage(symbol: "\(space.index)" as NSString, active: space.active, visible: space.visible)).onTapGesture {
+                    switchSpace()
+                }.frame(width:24, height: 16)
+            }
         case .fullscreen:
             Image(nsImage: generateImage(symbol: "F" as NSString, active: space.active, visible: space.visible)).onTapGesture {
                 switchSpace()
