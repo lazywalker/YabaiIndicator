@@ -63,8 +63,8 @@ func drawWindows(in content: NSRect, windows: [Window], display: Display) {
     let contentOrigin = content.origin
     let scaling = displaySize.height > displaySize.width ? displaySize.height / contentSize.height : displaySize.width / contentSize.width
     
-    // Guard against division by zero
-    guard scaling > 0 else {
+    // Guard against division by zero and invalid values
+    guard scaling > 0 && scaling.isFinite else {
         return
     }
     

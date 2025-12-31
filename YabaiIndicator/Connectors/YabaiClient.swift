@@ -67,9 +67,13 @@ class YabaiClient {
                       let spaceIndex = dict["space"] as? Int else {
                     return nil
                 }
-                return Window(id: id, pid: pid, app: app, title: title, 
-                            frame: NSRect(x: x, y: y, width: w, height: h), 
-                            displayIndex: displayIndex, spaceIndex: spaceIndex)
+                return Window(id: id,
+                              pid: pid,
+                              app: app,
+                              title: title,
+                              frame: NSRect(x: x, y: y, width: w, height: h),
+                              displayIndex: displayIndex,
+                              spaceIndex: spaceIndex)
             }
             return windows
         }
