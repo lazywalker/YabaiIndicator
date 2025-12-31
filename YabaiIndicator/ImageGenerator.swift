@@ -65,6 +65,7 @@ func drawWindows(in content: NSRect, windows: [Window], display: Display) {
     
     // Guard against division by zero and invalid values
     guard scaling > 0 && scaling.isFinite else {
+        NSLog("Warning: Invalid scaling value (\(scaling)) for display. Display size: \(displaySize), Content size: \(contentSize)")
         return
     }
     
