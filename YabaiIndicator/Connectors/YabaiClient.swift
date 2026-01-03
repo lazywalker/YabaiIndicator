@@ -12,6 +12,7 @@ enum YabaiClientError: Error {
     case jsonParsingFailed
     case invalidResponse
     case yabaiCommandFailed(Int)
+    case invalidInput(String)
 }
 
 struct YabaiResponse {
@@ -21,7 +22,37 @@ struct YabaiResponse {
 
 class YabaiClient {
 
+    /// Internal socket communication with input validation
+    /// - Parameter args: Command arguments to send
+    /// - Returns: Tuple of (error code, response string)
+    /// - Throws: YabaiClientError if validation fails or socket communication fails
+    ///
+    /// Validates all arguments for security and length constraints
     func _yabaiSocketCall(_ args: [String]) throws -> (Int, String) {
+        // Input validation
+        guard !args.isEmpty else {
+            throw YabaiClientError.invalidInput("Empty arguments array")
+        }
+
+        guard args.count <= Constants.Socket.maxArgumentCount else {
+            throw YabaiClientError.invalidInput(
+                "Exceeded maximum argument count: \(Constants.Socket.maxArgumentCount)")
+        }
+
+        for (index, arg) in args.enumerated() {
+            // Security: prevent null byte injection
+            if arg.contains("\0") {
+                throw YabaiClientError.invalidInput("Null bytes not allowed in argument #\(index)")
+            }
+
+            // Length validation
+            if arg.count > Constants.Socket.maxArgumentLength {
+                throw YabaiClientError.invalidInput(
+                    "Argument #\(index) exceeds maximum length: \(Constants.Socket.maxArgumentLength)"
+                )
+            }
+        }
+
         var cresp: UnsafeMutablePointer<CChar>? = nil
         var cargs = args.map { strdup($0) }
         defer {
@@ -42,6 +73,15 @@ class YabaiClient {
         return (Int(ret), response)
     }
 
+    /// Sends a command to yabai via socket and returns a parsed response
+    /// - Parameter args: Variable number of string arguments for the yabai command
+    /// - Returns: YabaiResponse containing error code and parsed JSON response
+    /// - Throws: YabaiClientError if socket communication fails, JSON parsing fails, or input validation fails
+    ///
+    /// Example usage:
+    /// ```swift
+    /// let response = try yabaiClient.yabaiSocketCall("-m", "query", "--spaces")
+    /// ```
     @discardableResult
     func yabaiSocketCall(_ args: String...) throws -> YabaiResponse {
         let (e, m) = try _yabaiSocketCall(args)
@@ -60,11 +100,29 @@ class YabaiClient {
         return r
     }
 
+    /// Focuses on a specific space by index
+    /// - Parameter index: The space index (must be > 0 and ≤ Constants.Validation.maxSpaceIndex)
+    /// - Throws: YabaiClientError if index is invalid or focus command fails
+    ///
+    /// Space indices are 1-based and correspond to workspace numbers in yabai
     func focusSpace(index: Int) throws {
+        guard index > 0 else {
+            throw YabaiClientError.invalidInput("Space index must be > 0")
+        }
+        guard index <= Constants.Validation.maxSpaceIndex else {
+            throw YabaiClientError.invalidInput(
+                "Space index exceeds maximum: \(Constants.Validation.maxSpaceIndex)")
+        }
         try yabaiSocketCall(
             "-m", "space", "--focus", "\(index)")
     }
 
+    /// Queries all open windows from yabai
+    /// - Returns: Array of Window structures with metadata
+    /// - Throws: YabaiClientError if query fails or response format is invalid
+    ///
+    /// Window data includes: window ID, process ID, app name, title, frame coordinates, display and space indices
+    /// Invalid or malformed window entries are silently filtered out
     func queryWindows() throws -> [Window] {
         let response = try yabaiSocketCall("-m", "query", "--windows")
         guard let r = response.response as? [[String: Any]] else {
@@ -86,6 +144,12 @@ class YabaiClient {
             else {
                 return nil
             }
+
+            // Validate window title length (prevent UI rendering issues)
+            guard title.count <= Constants.Validation.maxWindowTitleLength else {
+                return nil
+            }
+
             return Window(
                 id: id,
                 pid: pid,
