@@ -100,15 +100,9 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
                 if msg == "refresh" {
                     self.refreshData()
                 } else if msg == "refresh spaces" {
-                    receiverQueue.async {
-                        // NSLog("Refreshing on main thread")
-                        self.onSpaceRefresh()
-                    }
+                    self.onSpaceRefresh()
                 } else if msg == "refresh windows" {
-                    receiverQueue.async {
-                        // NSLog("Refreshing on main thread")
-                        self.onWindowRefresh()
-                    }
+                    self.onWindowRefresh()
                 }
             }
         } catch {
@@ -124,12 +118,13 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
     
     @objc
     func openPreferences() {
-      if #available(macOS 13, *) {
-          NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-      } else {
-          NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-      }
-      NSApp.activate(ignoringOtherApps: true)
+        let settingsView = SettingsView()
+        let hostingController = NSHostingController(rootView: settingsView)
+        let window = NSWindow(contentViewController: hostingController)
+        window.title = "Preferences"
+        window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
     
     func createStatusItemView() -> NSView {

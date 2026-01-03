@@ -74,6 +74,7 @@ int send_message(int argc, char** argv, char** response) {
     int sockfd;
     sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sockfd == -1) {
+        free(message);
         snprintf(*response, BUFSIZ, "yabai-msg: failed to open socket..\n");
         return EXIT_FAILURE;
     }
@@ -82,11 +83,13 @@ int send_message(int argc, char** argv, char** response) {
     snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
     
     if (!socket_connect(&sockfd, socket_file)) {
+        free(message);
         snprintf(*response, BUFSIZ, "yabai-msg: failed to connect to socket..\n");
         return EXIT_FAILURE;
     }
     
     if (send(sockfd, message, sizeof(int)+message_length, 0) == -1) {
+        free(message);
         snprintf(*response, BUFSIZ, "yabai-msg: failed to send data..\n");
         return EXIT_FAILURE;
     }

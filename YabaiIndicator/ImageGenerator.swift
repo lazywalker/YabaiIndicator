@@ -62,6 +62,13 @@ func drawWindows(in content: NSRect, windows: [Window], display: Display) {
     let contentSize = content.size
     let contentOrigin = content.origin
     let scaling = displaySize.height > displaySize.width ? displaySize.height / contentSize.height : displaySize.width / contentSize.width
+    
+    // Guard against division by zero and invalid values
+    guard scaling > 0 && scaling.isFinite else {
+        NSLog("Warning: Invalid scaling value (\(scaling)) for display. Display size: \(displaySize), Content size: \(contentSize)")
+        return
+    }
+    
     let xoffset = (displaySize.height > displaySize.width ? (contentSize.width - displaySize.width / scaling) / 2 : 0) + contentOrigin.x
     let yoffset = (displaySize.height > displaySize.width ? 0 : (contentSize.height - displaySize.height / scaling) / 2) + contentOrigin.y
     
