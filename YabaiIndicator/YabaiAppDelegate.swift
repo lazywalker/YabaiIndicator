@@ -100,14 +100,14 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
                 if msg == "refresh" {
                     self.refreshData()
                 } else if msg == "refresh spaces" {
-                    receiverQueue.async {
+                    receiverQueue.async { [weak self] in
                         // NSLog("Refreshing on main thread")
-                        self.onSpaceRefresh()
+                        self?.onSpaceRefresh()
                     }
                 } else if msg == "refresh windows" {
-                    receiverQueue.async {
+                    receiverQueue.async { [weak self] in
                         // NSLog("Refreshing on main thread")
-                        self.onWindowRefresh()
+                        self?.onWindowRefresh()
                     }
                 }
             }
