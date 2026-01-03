@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		055F4ED12F08FEED0068A474 /* Constants.abi.json in Resources */ = {isa = PBXBuildFile; fileRef = 055F4ED02F08FEED0068A474 /* Constants.abi.json */; };
 		500F41362780826500C6BC9B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500F41352780826500C6BC9B /* SettingsView.swift */; };
 		5051A4692780C02700614C85 /* YabaiClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5051A4682780C02700614C85 /* YabaiClient.swift */; };
 		5051A46B2780DC9B00614C85 /* defaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5051A46A2780DC9B00614C85 /* defaults.plist */; };
@@ -29,6 +30,11 @@
 		5086FE87278303EE00E51F61 /* NativeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5086FE86278303EE00E51F61 /* NativeClient.swift */; };
 		5086FE892783598E00E51F61 /* SpaceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5086FE882783598E00E51F61 /* SpaceType.swift */; };
 		50DF24C7277BD18700DF1906 /* ImageGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DF24C6277BD18700DF1906 /* ImageGenerator.swift */; };
+		50E1F2A8288B4C5B00A1B2C8 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1F2A4288B4C5700A1B2C4 /* Constants.swift */; };
+		50E1F2A9288B4C5C00A1B2C9 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1F2A3288B4C5600A1B2C3 /* ImageCache.swift */; };
+		50E1F2AA288B4C5D00A1B2CA /* StatusBarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1F2A5288B4C5800A1B2C5 /* StatusBarManager.swift */; };
+		50E1F2AB288B4C5E00A1B2CB /* DataRefreshManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1F2A6288B4C5900A1B2C6 /* DataRefreshManager.swift */; };
+		50E1F2AC288B4C5F00A1B2CC /* SocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1F2A7288B4C5A00A1B2C7 /* SocketServer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +55,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		055F4ED02F08FEED0068A474 /* Constants.abi.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Constants.abi.json; sourceTree = "<group>"; };
 		500F41352780826500C6BC9B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		5051A4682780C02700614C85 /* YabaiClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YabaiClient.swift; sourceTree = "<group>"; };
 		5051A46A2780DC9B00614C85 /* defaults.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = defaults.plist; sourceTree = "<group>"; };
@@ -79,6 +86,11 @@
 		5086FE86278303EE00E51F61 /* NativeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeClient.swift; sourceTree = "<group>"; };
 		5086FE882783598E00E51F61 /* SpaceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceType.swift; sourceTree = "<group>"; };
 		50DF24C6277BD18700DF1906 /* ImageGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageGenerator.swift; sourceTree = "<group>"; };
+		50E1F2A3288B4C5600A1B2C3 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
+		50E1F2A4288B4C5700A1B2C4 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		50E1F2A5288B4C5800A1B2C5 /* StatusBarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarManager.swift; sourceTree = "<group>"; };
+		50E1F2A6288B4C5900A1B2C6 /* DataRefreshManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRefreshManager.swift; sourceTree = "<group>"; };
+		50E1F2A7288B4C5A00A1B2C7 /* SocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketServer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,10 +155,16 @@
 				5061206B2779212000E8F192 /* YabaiIndicatorApp.swift */,
 				5061206D2779212000E8F192 /* ContentView.swift */,
 				50DF24C6277BD18700DF1906 /* ImageGenerator.swift */,
+				50E1F2A3288B4C5600A1B2C3 /* ImageCache.swift */,
+				50E1F2A4288B4C5700A1B2C4 /* Constants.swift */,
+				50E1F2A5288B4C5800A1B2C5 /* StatusBarManager.swift */,
+				50E1F2A6288B4C5900A1B2C6 /* DataRefreshManager.swift */,
+				50E1F2A7288B4C5A00A1B2C7 /* SocketServer.swift */,
 				5061206F2779212200E8F192 /* Assets.xcassets */,
 				506120742779212200E8F192 /* YabaiIndicator.entitlements */,
 				506120712779212200E8F192 /* Preview Content */,
 				506120972779239B00E8F192 /* YabaiAppDelegate.swift */,
+				055F4ED02F08FEED0068A474 /* Constants.abi.json */,
 				5061209E277A13C600E8F192 /* SkyLightConnector.h */,
 				5086FE7D2782006C00E51F61 /* SocketClient.h */,
 				5086FE7E2782006C00E51F61 /* SocketClient.c */,
@@ -324,6 +342,7 @@
 			files = (
 				506120732779212200E8F192 /* Preview Assets.xcassets in Resources */,
 				5051A46B2780DC9B00614C85 /* defaults.plist in Resources */,
+				055F4ED12F08FEED0068A474 /* Constants.abi.json in Resources */,
 				506120702779212200E8F192 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -360,6 +379,11 @@
 				5086FE842783026C00E51F61 /* ButtonStyle.swift in Sources */,
 				5051A4692780C02700614C85 /* YabaiClient.swift in Sources */,
 				5086FE7F2782006D00E51F61 /* SocketClient.c in Sources */,
+				50E1F2A8288B4C5B00A1B2C8 /* Constants.swift in Sources */,
+				50E1F2A9288B4C5C00A1B2C9 /* ImageCache.swift in Sources */,
+				50E1F2AA288B4C5D00A1B2CA /* StatusBarManager.swift in Sources */,
+				50E1F2AB288B4C5E00A1B2CB /* DataRefreshManager.swift in Sources */,
+				50E1F2AC288B4C5F00A1B2CC /* SocketServer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
