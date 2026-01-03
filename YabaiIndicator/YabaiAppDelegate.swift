@@ -80,4 +80,10 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
             object: nil
         )
     }
+
+    deinit {
+        // Remove all notification observers
+        NotificationCenter.default.removeObserver(dataRefreshManager)
+        NSWorkspace.shared.notificationCenter.removeObserver(dataRefreshManager)
+    }
 }

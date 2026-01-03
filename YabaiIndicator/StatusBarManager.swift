@@ -12,6 +12,7 @@ class StatusBarManager {
     private var statusBarItem: NSStatusItem?
     private var spaceModel: SpaceModel
     private var sinks: [AnyCancellable] = []
+    private var hostingView: NSHostingView<AnyView>?
 
     init(spaceModel: SpaceModel) {
         self.spaceModel = spaceModel
@@ -70,10 +71,16 @@ class StatusBarManager {
             subView.removeFromSuperview()
         }
 
-        // Add new view with correct width
-        let newView = createStatusItemView()
-        newView.setFrameSize(NSSize(width: newWidth, height: Constants.statusBarHeight))
-        statusBarItem?.button?.addSubview(newView)
+        // Create or reuse hosting view
+        if hostingView == nil {
+            hostingView = NSHostingView(
+                rootView: AnyView(ContentView().environmentObject(spaceModel)))
+        }
+
+        hostingView?.setFrameSize(NSSize(width: newWidth, height: Constants.statusBarHeight))
+        if let hostingView = hostingView {
+            statusBarItem?.button?.addSubview(hostingView)
+        }
 
         // Update button frame
         statusBarItem?.button?.frame.size.width = newWidth
@@ -126,8 +133,15 @@ class StatusBarManager {
     }
 
     deinit {
+        // Cancel all Combine subscriptions
         sinks.forEach { $0.cancel() }
         sinks.removeAll()
+
+        // Clean up hosting view
+        hostingView?.removeFromSuperview()
+        hostingView = nil
+
+        // Remove status bar item
         if let item = statusBarItem {
             NSStatusBar.system.removeStatusItem(item)
         }

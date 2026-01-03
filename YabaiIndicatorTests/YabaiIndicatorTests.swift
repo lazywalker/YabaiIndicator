@@ -121,3 +121,27 @@ class YabaiIndicatorTests: XCTestCase {
         // Verify that either spaces were loaded or an error message was set
         XCTAssertTrue(!spaceModel.spaces.isEmpty || spaceModel.errorMessage != nil)
     }
+
+    func testDataRefreshManagerDeinit() {
+        weak var weakRef: DataRefreshManager?
+        autoreleasepool {
+            var mgr: DataRefreshManager? = DataRefreshManager(spaceModel: SpaceModel())
+            weakRef = mgr
+            mgr?.refreshData()
+            mgr = nil
+        }
+        // Give the run loop a moment to run cleanup
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1))
+        XCTAssertNil(weakRef, "DataRefreshManager should be deallocated and not leak")
+    }
+
+    func testStatusBarManagerDeinit() {
+        weak var weakRef: StatusBarManager?
+        autoreleasepool {
+            var mgr: StatusBarManager? = StatusBarManager(spaceModel: SpaceModel())
+            weakRef = mgr
+            mgr = nil
+        }
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1))
+        XCTAssertNil(weakRef, "StatusBarManager should be deallocated and not leak")
+    }
