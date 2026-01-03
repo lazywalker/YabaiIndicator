@@ -538,6 +538,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 0.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = de.arsbrevis.YabaiIndicator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -575,6 +576,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 0.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = de.arsbrevis.YabaiIndicator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -597,7 +599,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = T3UD8QX5G4;
 				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.6;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = de.arsbrevis.YabaiIndicatorTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -616,7 +618,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = T3UD8QX5G4;
 				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.6;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = de.arsbrevis.YabaiIndicatorTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
