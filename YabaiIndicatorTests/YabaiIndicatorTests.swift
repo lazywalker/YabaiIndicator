@@ -10,27 +10,114 @@ import XCTest
 
 class YabaiIndicatorTests: XCTestCase {
 
+    var nativeClient: NativeClient!
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        nativeClient = NativeClient()
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        nativeClient = nil
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    func testQuerySpacesSuccess() throws {
+        // Test that querySpaces returns a non-empty array when successful
+        do {
+            let spaces = try nativeClient.querySpaces()
+            XCTAssertFalse(spaces.isEmpty, "Spaces array should not be empty")
+            
+            // Verify space properties
+            for space in spaces {
+                XCTAssertGreaterThan(space.spaceid, 0, "Space ID should be greater than 0")
+                XCTAssertFalse(space.uuid.isEmpty, "Space UUID should not be empty")
+                XCTAssertGreaterThanOrEqual(space.display, 1, "Display index should be >= 1")
+                XCTAssertGreaterThanOrEqual(space.index, 1, "Space index should be >= 1")
+            }
+        } catch {
+            // If yabai is not running, this is expected
+            if case NativeClientError.connectionFailed = error {
+                print("Skipping test: yabai not available")
+                throw XCTSkip("yabai not running")
+            }
+            throw error
+        }
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    
+    func testQueryDisplaysSuccess() throws {
+        // Test that queryDisplays returns a non-empty array when successful
+        do {
+            let displays = try nativeClient.queryDisplays()
+            XCTAssertFalse(displays.isEmpty, "Displays array should not be empty")
+            
+            // Verify display properties
+            for display in displays {
+                XCTAssertGreaterThan(display.id, 0, "Display ID should be greater than 0")
+                XCTAssertFalse(display.uuid.isEmpty, "Display UUID should not be empty")
+                XCTAssertGreaterThanOrEqual(display.index, 0, "Display index should be >= 0")
+                XCTAssertGreaterThan(display.frame.width, 0, "Display width should be > 0")
+                XCTAssertGreaterThan(display.frame.height, 0, "Display height should be > 0")
+            }
+        } catch {
+            // If system APIs fail, this is expected in some environments
+            if case NativeClientError.displayQueryFailed = error {
+                print("Skipping test: display query failed")
+                throw XCTSkip("Display query failed")
+            }
+            throw error
         }
     }
 
-}
+    func testYabaiClientQueryWindows() throws {
+        // Test that queryWindows works when yabai is available
+        do {
+            let windows = try gYabaiClient.queryWindows()
+            // Windows array can be empty, that's fine
+            for window in windows {
+                XCTAssertGreaterThan(window.id, 0, "Window ID should be greater than 0")
+                XCTAssertGreaterThanOrEqual(window.pid, 0, "PID should be >= 0")
+                XCTAssertFalse(window.app.isEmpty, "App name should not be empty")
+                XCTAssertGreaterThan(window.frame.width, 0, "Window width should be > 0")
+                XCTAssertGreaterThan(window.frame.height, 0, "Window height should be > 0")
+            }
+        } catch {
+            // If yabai is not running, this is expected
+            if case YabaiClientError.yabaiCommandFailed = error {
+                print("Skipping test: yabai not running")
+                throw XCTSkip("yabai not running")
+            }
+            throw error
+        }
+    }
+    
+    func testDataRefreshManager() throws {
+        let spaceModel = SpaceModel()
+        let dataRefreshManager = DataRefreshManager(spaceModel: spaceModel)
+        
+        // Test initial state
+        XCTAssertTrue(spaceModel.spaces.isEmpty)
+        XCTAssertTrue(spaceModel.displays.isEmpty)
+        XCTAssertTrue(spaceModel.windows.isEmpty)
+        XCTAssertNil(spaceModel.errorMessage)
+        
+        // Test refresh (this will run asynchronously)
+        dataRefreshManager.refreshData()
+        
+        // Wait a bit for async operation
+        let expectation = XCTestExpectation(description: "Data refresh completes")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            // Check that either data was loaded or an error was set
+            if spaceModel.spaces.isEmpty && spaceModel.errorMessage == nil {
+                // Still loading, wait a bit more
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    expectation.fulfill()
+                }
+            } else {
+                expectation.fulfill()
+            }
+        }
+        
+        wait(for: [expectation], timeout: 2.0)
+        
+        // Verify that either spaces were loaded or an error message was set
+        XCTAssertTrue(!spaceModel.spaces.isEmpty || spaceModel.errorMessage != nil)
+    }

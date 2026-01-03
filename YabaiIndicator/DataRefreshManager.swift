@@ -5,47 +5,63 @@
 //  Created for architecture refactoring
 //
 
-import Foundation
 import Combine
+import Foundation
 
 class DataRefreshManager {
     private var spaceModel: SpaceModel
     private let receiverQueue = DispatchQueue(label: Constants.Socket.receiverQueueLabel)
-    
+
     init(spaceModel: SpaceModel) {
         self.spaceModel = spaceModel
     }
-    
-    func refreshData() {
+
+    @objc func refreshData() {
         receiverQueue.async { [weak self] in
             self?.onSpaceRefresh()
             self?.onWindowRefresh()
         }
     }
-    
+
     func onSpaceRefresh() {
-        let displays = gNativeClient.queryDisplays()
-        let spaceElems = gNativeClient.querySpaces()
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.spaceModel.displays = displays
-            self?.spaceModel.spaces = spaceElems
-        }
-    }
-    
-    func onWindowRefresh() {
-        if UserDefaults.standard.buttonStyle == .windows {
-            let windows = gYabaiClient.queryWindows()
+        do {
+            let displays = try gNativeClient.queryDisplays()
+            let spaceElems = try gNativeClient.querySpaces()
+
             DispatchQueue.main.async { [weak self] in
-                self?.spaceModel.windows = windows
+                self?.spaceModel.displays = displays
+                self?.spaceModel.spaces = spaceElems
+                self?.spaceModel.errorMessage = nil
+            }
+        } catch {
+            print("DataRefreshManager: Failed to refresh space data - \(error)")
+            DispatchQueue.main.async { [weak self] in
+                self?.spaceModel.errorMessage = "Failed to load space information"
             }
         }
     }
-    
+
+    func onWindowRefresh() {
+        if UserDefaults.standard.buttonStyle == .windows {
+            do {
+                let windows = try gYabaiClient.queryWindows()
+                DispatchQueue.main.async { [weak self] in
+                    self?.spaceModel.windows = windows
+                    self?.spaceModel.errorMessage = nil
+                }
+            } catch {
+                print("DataRefreshManager: Failed to refresh window data - \(error)")
+                DispatchQueue.main.async { [weak self] in
+                    self?.spaceModel.errorMessage = "Failed to load window information"
+                }
+            }
+        }
+    }
+
     @objc func onSpaceChanged(_ notification: Notification) {
         onSpaceRefresh()
     }
-    
+
     @objc func onDisplayChanged(_ notification: Notification) {
         onSpaceRefresh()
     }

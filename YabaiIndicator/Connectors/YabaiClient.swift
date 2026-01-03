@@ -7,77 +7,95 @@
 
 import SwiftUI
 
+enum YabaiClientError: Error {
+    case socketConnectionFailed
+    case jsonParsingFailed
+    case invalidResponse
+    case yabaiCommandFailed(Int)
+}
+
 struct YabaiResponse {
-    let error:Int
-    let response:Any
+    let error: Int
+    let response: Any
 }
 
 class YabaiClient {
-    
-    func _yabaiSocketCall(_ args: [String]) -> (Int, String) {
-        var cresp:UnsafeMutablePointer<CChar>? = nil
+
+    func _yabaiSocketCall(_ args: [String]) throws -> (Int, String) {
+        var cresp: UnsafeMutablePointer<CChar>? = nil
         var cargs = args.map { strdup($0) }
+        defer {
+            for ptr in cargs { free(ptr) }
+            free(cresp)
+        }
 
         let ret = send_message(Int32(args.count), &cargs, &cresp)
 
-        for ptr in cargs { free(ptr) }
+        guard ret == 0 else {
+            throw YabaiClientError.yabaiCommandFailed(Int(ret))
+        }
+
         var response = ""
         if let r = cresp {
             response = String(cString: r)
         }
-        free(cresp)
         return (Int(ret), response)
     }
-    
+
     @discardableResult
-    func yabaiSocketCall(_ args: String...) -> YabaiResponse {
-        let (e, m) = _yabaiSocketCall(args)
+    func yabaiSocketCall(_ args: String...) throws -> YabaiResponse {
+        let (e, m) = try _yabaiSocketCall(args)
         var resp: Any = []
         if m.count > 0 {
             if let data = m.data(using: .utf8) {
                 do {
                     resp = try JSONSerialization.jsonObject(with: data, options: [])
                 } catch {
-                    print(error)
+                    print("YabaiClient: JSON parsing error - \(error)")
+                    throw YabaiClientError.jsonParsingFailed
                 }
             }
         }
         let r = YabaiResponse(error: e, response: resp)
         return r
     }
-    
-    func focusSpace(index: Int) {
-        yabaiSocketCall(
+
+    func focusSpace(index: Int) throws {
+        try yabaiSocketCall(
             "-m", "space", "--focus", "\(index)")
     }
 
-    func queryWindows() -> [Window] {
-        if let r = yabaiSocketCall("-m", "query", "--windows").response as? [[String: Any]] {
-            let windows = r.compactMap { dict -> Window? in
-                guard let id = dict["id"] as? UInt64,
-                      let pid = dict["pid"] as? UInt64,
-                      let app = dict["app"] as? String,
-                      let title = dict["title"] as? String,
-                      let frameDict = dict["frame"] as? [String: Double],
-                      let x = frameDict["x"],
-                      let y = frameDict["y"],
-                      let w = frameDict["w"],
-                      let h = frameDict["h"],
-                      let displayIndex = dict["display"] as? Int,
-                      let spaceIndex = dict["space"] as? Int else {
-                    return nil
-                }
-                return Window(id: id,
-                              pid: pid,
-                              app: app,
-                              title: title,
-                              frame: NSRect(x: x, y: y, width: w, height: h),
-                              displayIndex: displayIndex,
-                              spaceIndex: spaceIndex)
-            }
-            return windows
+    func queryWindows() throws -> [Window] {
+        let response = try yabaiSocketCall("-m", "query", "--windows")
+        guard let r = response.response as? [[String: Any]] else {
+            throw YabaiClientError.invalidResponse
         }
-        return []
+
+        let windows = r.compactMap { dict -> Window? in
+            guard let id = dict["id"] as? UInt64,
+                let pid = dict["pid"] as? UInt64,
+                let app = dict["app"] as? String,
+                let title = dict["title"] as? String,
+                let frameDict = dict["frame"] as? [String: Double],
+                let x = frameDict["x"],
+                let y = frameDict["y"],
+                let w = frameDict["w"],
+                let h = frameDict["h"],
+                let displayIndex = dict["display"] as? Int,
+                let spaceIndex = dict["space"] as? Int
+            else {
+                return nil
+            }
+            return Window(
+                id: id,
+                pid: pid,
+                app: app,
+                title: title,
+                frame: NSRect(x: x, y: y, width: w, height: h),
+                displayIndex: displayIndex,
+                spaceIndex: spaceIndex)
+        }
+        return windows
     }
 }
 

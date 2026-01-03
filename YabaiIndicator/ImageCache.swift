@@ -13,7 +13,7 @@ class ImageCache {
         cache.countLimit = Constants.Cache.maxCacheSize
         return cache
     }()
-    
+
     static func image(for key: String, generator: () -> NSImage) -> NSImage {
         if let cached = shared.object(forKey: key as NSString) {
             return cached
@@ -22,7 +22,7 @@ class ImageCache {
         shared.setObject(image, forKey: key as NSString)
         return image
     }
-    
+
     static func clearCache() {
         shared.removeAllObjects()
     }
