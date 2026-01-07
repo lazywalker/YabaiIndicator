@@ -12,12 +12,22 @@ class DataRefreshManager {
     private var spaceModel: SpaceModel
     private let receiverQueue = DispatchQueue(label: Constants.Socket.receiverQueueLabel)
     private var currentTask: Task<Void, Never>? = nil
+    private var lastRefreshTime: Date = Date.distantPast
 
     init(spaceModel: SpaceModel) {
         self.spaceModel = spaceModel
     }
 
     @objc func refreshData() {
+        // Debounce rapid refresh calls to prevent excessive updates
+        let now = Date()
+        guard now.timeIntervalSince(lastRefreshTime) > 0.1 else { return }
+        lastRefreshTime = now
+
+        // Cancel any pending refresh task to prevent overlapping requests
+        currentTask?.cancel()
+        currentTask = nil
+
         // Store the task so it can be cancelled if the manager is deallocated
         currentTask = Task { [weak self] in
             await self?.performAsyncRefresh()

@@ -29,6 +29,8 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
     private lazy var socketServer = SocketServer(dataRefreshManager: dataRefreshManager)
 
     private var socketTask: Task<Void, Never>?
+    private var observersRegistered = false
+    private var refreshTimer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Load default preferences
@@ -51,6 +53,9 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
 
         // Initial data refresh
         dataRefreshManager.refreshData()
+
+        // Setup periodic refresh to handle missed events
+        setupPeriodicRefresh()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -59,6 +64,9 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func registerObservers() {
+        guard !observersRegistered else { return }
+        observersRegistered = true
+
         NSWorkspace.shared.notificationCenter.addObserver(
             dataRefreshManager,
             selector: #selector(DataRefreshManager.onSpaceChanged(_:)),
@@ -72,6 +80,14 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
             object: nil
         )
 
+        // Add observer for window focus change to catch moved windows
+        NSWorkspace.shared.notificationCenter.addObserver(
+            dataRefreshManager,
+            selector: #selector(DataRefreshManager.onSpaceChanged(_:)),
+            name: NSWorkspace.didActivateApplicationNotification,
+            object: nil
+        )
+
         // Add observer for manual refresh requests
         NotificationCenter.default.addObserver(
             dataRefreshManager,
@@ -81,9 +97,28 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
         )
     }
 
+    private func setupPeriodicRefresh() {
+        // Setup a fallback periodic refresh timer to catch events that might be missed
+        // This helps recover from any event handling issues
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            self?.dataRefreshManager.refreshData()
+        }
+    }
+
     deinit {
+        // Cancel timer
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+
         // Remove all notification observers
-        NotificationCenter.default.removeObserver(dataRefreshManager)
-        NSWorkspace.shared.notificationCenter.removeObserver(dataRefreshManager)
+        if observersRegistered {
+            NotificationCenter.default.removeObserver(dataRefreshManager)
+            NSWorkspace.shared.notificationCenter.removeObserver(dataRefreshManager)
+            observersRegistered = false
+        }
+
+        // Cancel socket task
+        socketTask?.cancel()
+        socketTask = nil
     }
 }

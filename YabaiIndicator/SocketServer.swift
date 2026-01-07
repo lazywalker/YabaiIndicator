@@ -76,6 +76,5 @@ class SocketServer {
 
     deinit {
         stop()
-        stop()
     }
 }
