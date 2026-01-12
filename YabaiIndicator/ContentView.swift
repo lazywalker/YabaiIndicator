@@ -25,8 +25,9 @@ struct SpaceButton: View {
         if !space.active && space.yabaiIndex > 0 {
             do {
                 try gYabaiClient.focusSpace(index: space.yabaiIndex)
+                logDebug("Switched to space \(space.yabaiIndex)")
             } catch {
-                print("SpaceButton: Failed to switch space - \(error)")
+                logError("SpaceButton: Failed to switch space - \(error)")
                 // Could show user feedback here if needed
             }
         }
@@ -55,8 +56,9 @@ struct WindowSpaceButton: View {
         if !space.active && space.yabaiIndex > 0 {
             do {
                 try gYabaiClient.focusSpace(index: space.yabaiIndex)
+                logDebug("WindowSpaceButton: Switched to space \(space.yabaiIndex)")
             } catch {
-                print("WindowSpaceButton: Failed to switch space - \(error)")
+                logError("WindowSpaceButton: Failed to switch space - \(error)")
                 // Could show user feedback here if needed
             }
         }

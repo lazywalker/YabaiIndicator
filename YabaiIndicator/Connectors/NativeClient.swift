@@ -10,17 +10,32 @@
 import ColorSync
 import Foundation
 
-enum NativeClientError: Error {
+enum NativeClientError: Error, CustomStringConvertible {
     case connectionFailed
     case displayQueryFailed
     case spaceQueryFailed
     case invalidDisplayData
     case invalidSpaceData
     case validationError(String)
+
+    var description: String {
+        switch self {
+        case .connectionFailed: return "SLS connection failed"
+        case .displayQueryFailed: return "Display query failed"
+        case .spaceQueryFailed: return "Space query failed"
+        case .invalidDisplayData: return "Invalid display data"
+        case .invalidSpaceData: return "Invalid space data"
+        case .validationError(let msg): return "Validation error: \(msg)"
+        }
+    }
 }
 
 class NativeClient {
     let gConnection = SLSMainConnectionID()
+
+    init() {
+        logDebug("NativeClient initialized with connection ID: \(gConnection)")
+    }
 
     /// Queries the list of spaces from macOS system.
     /// Returns all available spaces across all displays without requiring yabai.
@@ -41,9 +56,11 @@ class NativeClient {
             let activeDisplayUUID = try getActiveDisplayUUID()
             let displays = try getManagedDisplaySpaces()
 
-            return try parseSpaces(from: displays, activeDisplayUUID: activeDisplayUUID)
+            let spaces = try parseSpaces(from: displays, activeDisplayUUID: activeDisplayUUID)
+            logDebug("NativeClient: Queried \(spaces.count) spaces")
+            return spaces
         } catch {
-            print("NativeClient: Failed to query spaces - \(error)")
+            logError("NativeClient: Failed to query spaces - \(error)")
             throw error
         }
     }
@@ -131,9 +148,11 @@ class NativeClient {
     func queryDisplays() throws -> [Display] {
         do {
             let rawUuids = try getManagedDisplays()
-            return try parseDisplays(from: rawUuids)
+            let displays = try parseDisplays(from: rawUuids)
+            logDebug("NativeClient: Queried \(displays.count) displays")
+            return displays
         } catch {
-            print("NativeClient: Failed to query displays - \(error)")
+            logError("NativeClient: Failed to query displays - \(error)")
             throw error
         }
     }

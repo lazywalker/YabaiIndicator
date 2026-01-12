@@ -31,17 +31,24 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
     private var socketTask: Task<Void, Never>?
     private var observersRegistered = false
     private var refreshTimer: Timer?
+    private var memoryWarningObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Initialize logger first
+        _ = Logger.shared
+        logInfo("Application launching...")
+
         // Load default preferences
         if let prefs = Bundle.main.path(forResource: "defaults", ofType: "plist"),
             let dict = NSDictionary(contentsOfFile: prefs) as? [String: Any]
         {
             UserDefaults.standard.register(defaults: dict)
+            logDebug("Loaded default preferences")
         }
 
         // Setup status bar
         statusBarManager.setupStatusBar()
+        logInfo("Status bar initialized")
 
         // Register workspace observers
         registerObservers()
@@ -50,22 +57,38 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
         socketTask = Task {
             await socketServer.start()
         }
+        logInfo("Socket server task started")
 
         // Initial data refresh
         dataRefreshManager.refreshData()
 
         // Setup periodic refresh to handle missed events
         setupPeriodicRefresh()
+
+        // Setup memory warning observer
+        setupMemoryWarningObserver()
+
+        logInfo("Application launch completed successfully")
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        logInfo("Application terminating...")
+        Logger.shared.logStats()
+
         socketTask?.cancel()
         socketServer.stop()
+
+        logInfo("Application terminated gracefully")
+        Logger.shared.flush()
     }
 
     private func registerObservers() {
-        guard !observersRegistered else { return }
+        guard !observersRegistered else {
+            logWarning("Observers already registered, skipping")
+            return
+        }
         observersRegistered = true
+        logDebug("Registering workspace observers...")
 
         NSWorkspace.shared.notificationCenter.addObserver(
             dataRefreshManager,
@@ -95,6 +118,8 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
             name: NSNotification.Name("RefreshData"),
             object: nil
         )
+
+        logInfo("Workspace observers registered successfully")
     }
 
     private func setupPeriodicRefresh() {
@@ -103,9 +128,22 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
         refreshTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             self?.dataRefreshManager.refreshData()
         }
+        logDebug("Periodic refresh timer started (interval: 2.0s)")
+    }
+
+    private func setupMemoryWarningObserver() {
+        // Log periodic stats every hour
+        Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { [weak self] _ in
+            guard self != nil else { return }
+            logInfo("Hourly stats checkpoint")
+            Logger.shared.logStats()
+        }
+        logDebug("Memory and stats monitoring started")
     }
 
     deinit {
+        logDebug("YabaiAppDelegate deinit starting...")
+
         // Cancel timer
         refreshTimer?.invalidate()
         refreshTimer = nil
@@ -117,8 +155,15 @@ class YabaiAppDelegate: NSObject, NSApplicationDelegate {
             observersRegistered = false
         }
 
+        // Remove memory warning observer
+        if let observer = memoryWarningObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+
         // Cancel socket task
         socketTask?.cancel()
         socketTask = nil
+
+        logDebug("YabaiAppDelegate deinit completed")
     }
 }

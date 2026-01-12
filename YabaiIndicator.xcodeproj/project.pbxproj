@@ -35,6 +35,7 @@
 		50E1F2AA288B4C5D00A1B2CA /* StatusBarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1F2A5288B4C5800A1B2C5 /* StatusBarManager.swift */; };
 		50E1F2AB288B4C5E00A1B2CB /* DataRefreshManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1F2A6288B4C5900A1B2C6 /* DataRefreshManager.swift */; };
 		50E1F2AC288B4C5F00A1B2CC /* SocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1F2A7288B4C5A00A1B2C7 /* SocketServer.swift */; };
+		50E1F2AD288B4C6000A1B2CD /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1F2AE288B4C6100A1B2CE /* Logger.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,6 +92,7 @@
 		50E1F2A5288B4C5800A1B2C5 /* StatusBarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarManager.swift; sourceTree = "<group>"; };
 		50E1F2A6288B4C5900A1B2C6 /* DataRefreshManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRefreshManager.swift; sourceTree = "<group>"; };
 		50E1F2A7288B4C5A00A1B2C7 /* SocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketServer.swift; sourceTree = "<group>"; };
+		50E1F2AE288B4C6100A1B2CE /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,6 +162,7 @@
 				50E1F2A5288B4C5800A1B2C5 /* StatusBarManager.swift */,
 				50E1F2A6288B4C5900A1B2C6 /* DataRefreshManager.swift */,
 				50E1F2A7288B4C5A00A1B2C7 /* SocketServer.swift */,
+				50E1F2AE288B4C6100A1B2CE /* Logger.swift */,
 				5061206F2779212200E8F192 /* Assets.xcassets */,
 				506120742779212200E8F192 /* YabaiIndicator.entitlements */,
 				506120712779212200E8F192 /* Preview Content */,
@@ -384,6 +387,7 @@
 				50E1F2AA288B4C5D00A1B2CA /* StatusBarManager.swift in Sources */,
 				50E1F2AB288B4C5E00A1B2CB /* DataRefreshManager.swift in Sources */,
 				50E1F2AC288B4C5F00A1B2CC /* SocketServer.swift in Sources */,
+				50E1F2AD288B4C6000A1B2CD /* Logger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,12 +7,22 @@
 
 import SwiftUI
 
-enum YabaiClientError: Error {
+enum YabaiClientError: Error, CustomStringConvertible {
     case socketConnectionFailed
     case jsonParsingFailed
     case invalidResponse
     case yabaiCommandFailed(Int)
     case invalidInput(String)
+
+    var description: String {
+        switch self {
+        case .socketConnectionFailed: return "Socket connection failed"
+        case .jsonParsingFailed: return "JSON parsing failed"
+        case .invalidResponse: return "Invalid response"
+        case .yabaiCommandFailed(let code): return "Yabai command failed with code \(code)"
+        case .invalidInput(let msg): return "Invalid input: \(msg)"
+        }
+    }
 }
 
 struct YabaiResponse {
@@ -21,6 +31,10 @@ struct YabaiResponse {
 }
 
 class YabaiClient {
+
+    init() {
+        logDebug("YabaiClient initialized")
+    }
 
     /// Internal socket communication with input validation
     /// - Parameter args: Command arguments to send
@@ -91,7 +105,7 @@ class YabaiClient {
                 do {
                     resp = try JSONSerialization.jsonObject(with: data, options: [])
                 } catch {
-                    print("YabaiClient: JSON parsing error - \(error)")
+                    logError("YabaiClient: JSON parsing error - \(error)")
                     throw YabaiClientError.jsonParsingFailed
                 }
             }
@@ -113,6 +127,7 @@ class YabaiClient {
             throw YabaiClientError.invalidInput(
                 "Space index exceeds maximum: \(Constants.Validation.maxSpaceIndex)")
         }
+        logDebug("YabaiClient: Focusing space \(index)")
         try yabaiSocketCall(
             "-m", "space", "--focus", "\(index)")
     }
@@ -126,6 +141,7 @@ class YabaiClient {
     func queryWindows() throws -> [Window] {
         let response = try yabaiSocketCall("-m", "query", "--windows")
         guard let r = response.response as? [[String: Any]] else {
+            logError("YabaiClient: Invalid response format for queryWindows")
             throw YabaiClientError.invalidResponse
         }
 
@@ -159,6 +175,7 @@ class YabaiClient {
                 displayIndex: displayIndex,
                 spaceIndex: spaceIndex)
         }
+        logDebug("YabaiClient: Queried \(windows.count) windows")
         return windows
     }
 }
