@@ -84,8 +84,13 @@ class StatusBarManager {
             newWidth = Constants.itemWidth
         }
 
-        statusBarItem?.button?.frame.size.width = newWidth
-        if let firstSubview = statusBarItem?.button?.subviews.first {
+        guard let button = statusBarItem?.button else {
+            logWarning("StatusBarItem button is nil, cannot refresh")
+            return
+        }
+
+        button.frame.size.width = newWidth
+        if let firstSubview = button.subviews.first {
             firstSubview.frame.size.width = newWidth
         }
 
@@ -123,7 +128,12 @@ class StatusBarManager {
         }
 
         // Remove existing subviews
-        for subView in statusBarItem?.button?.subviews ?? [] {
+        guard let button = statusBarItem?.button else {
+            logWarning("StatusBarItem button is nil in refreshButtonStyle")
+            return
+        }
+
+        for subView in button.subviews {
             subView.removeFromSuperview()
         }
 
@@ -136,11 +146,11 @@ class StatusBarManager {
 
         hostingView?.setFrameSize(NSSize(width: newWidth, height: Constants.statusBarHeight))
         if let hostingView = hostingView {
-            statusBarItem?.button?.addSubview(hostingView)
+            button.addSubview(hostingView)
         }
 
         // Update button frame
-        statusBarItem?.button?.frame.size.width = newWidth
+        button.frame.size.width = newWidth
         logDebug("Button style refreshed, width: \(newWidth)")
     }
 

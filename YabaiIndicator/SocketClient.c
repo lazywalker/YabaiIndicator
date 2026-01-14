@@ -60,7 +60,7 @@ int send_message(int argc, char** argv, char** response) {
     }
 
     char *message = malloc(sizeof(int)+message_length);
-    char *temp = sizeof(int)+message;
+    char *temp = message + sizeof(int);
     
     memcpy(message, &message_length, sizeof(int));
     
